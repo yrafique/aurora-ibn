@@ -1,0 +1,287 @@
+{
+  "test_summary": {
+    "total": 37,
+    "passed": 28,
+    "failed": 5,
+    "skipped": 4,
+    "success_rate": "75.7%",
+    "duration": "0:00:10.456942",
+    "timestamp": "2025-08-27T22:49:16.881726"
+  },
+  "detailed_results": [
+    {
+      "test_name": "Container aurora-controller",
+      "status": "PASSED",
+      "details": "Container running successfully",
+      "timestamp": "2025-08-27T22:49:06.454136",
+      "response_data": null
+    },
+    {
+      "test_name": "Container aurora-tester",
+      "status": "PASSED",
+      "details": "Container running successfully",
+      "timestamp": "2025-08-27T22:49:06.480274",
+      "response_data": null
+    },
+    {
+      "test_name": "Container mock-srlinux-pe1",
+      "status": "PASSED",
+      "details": "Container running successfully",
+      "timestamp": "2025-08-27T22:49:06.504318",
+      "response_data": null
+    },
+    {
+      "test_name": "Container mock-cisco-pe2",
+      "status": "PASSED",
+      "details": "Container running successfully",
+      "timestamp": "2025-08-27T22:49:06.527681",
+      "response_data": null
+    },
+    {
+      "test_name": "Container ce1-linux",
+      "status": "PASSED",
+      "details": "Container running successfully",
+      "timestamp": "2025-08-27T22:49:06.552402",
+      "response_data": null
+    },
+    {
+      "test_name": "Container ce2-linux",
+      "status": "PASSED",
+      "details": "Container running successfully",
+      "timestamp": "2025-08-27T22:49:06.577454",
+      "response_data": null
+    },
+    {
+      "test_name": "Container nettools",
+      "status": "PASSED",
+      "details": "Container running successfully",
+      "timestamp": "2025-08-27T22:49:06.602646",
+      "response_data": null
+    },
+    {
+      "test_name": "Network connectivity",
+      "status": "PASSED",
+      "details": "Controller -> Nokia PE1",
+      "timestamp": "2025-08-27T22:49:07.736027",
+      "response_data": null
+    },
+    {
+      "test_name": "Network connectivity",
+      "status": "PASSED",
+      "details": "Controller -> Cisco PE2",
+      "timestamp": "2025-08-27T22:49:08.885185",
+      "response_data": null
+    },
+    {
+      "test_name": "Network connectivity",
+      "status": "PASSED",
+      "details": "Controller -> CE1",
+      "timestamp": "2025-08-27T22:49:10.050017",
+      "response_data": null
+    },
+    {
+      "test_name": "Network connectivity",
+      "status": "PASSED",
+      "details": "Controller -> CE2",
+      "timestamp": "2025-08-27T22:49:11.191707",
+      "response_data": null
+    },
+    {
+      "test_name": "Network connectivity",
+      "status": "PASSED",
+      "details": "Controller -> NetTools",
+      "timestamp": "2025-08-27T22:49:12.342463",
+      "response_data": null
+    },
+    {
+      "test_name": "Mock service NETCONF",
+      "status": "SKIPPED",
+      "details": "Nokia NETCONF simulated service",
+      "timestamp": "2025-08-27T22:49:12.399001",
+      "response_data": null
+    },
+    {
+      "test_name": "Mock service gNMI",
+      "status": "SKIPPED",
+      "details": "Nokia gNMI simulated service",
+      "timestamp": "2025-08-27T22:49:12.463963",
+      "response_data": null
+    },
+    {
+      "test_name": "Mock service NETCONF",
+      "status": "SKIPPED",
+      "details": "Cisco NETCONF simulated service",
+      "timestamp": "2025-08-27T22:49:12.532652",
+      "response_data": null
+    },
+    {
+      "test_name": "Mock service gNMI",
+      "status": "SKIPPED",
+      "details": "Cisco gNMI simulated service",
+      "timestamp": "2025-08-27T22:49:12.605358",
+      "response_data": null
+    },
+    {
+      "test_name": "Config file Nokia SR Linux",
+      "status": "PASSED",
+      "details": "File exists with 78 lines",
+      "timestamp": "2025-08-27T22:49:12.737280",
+      "response_data": null
+    },
+    {
+      "test_name": "Config content Nokia SR Linux",
+      "status": "PASSED",
+      "details": "Valid content: # Nokia SR Linux Configuration for L3VPN ACME-CORP...",
+      "timestamp": "2025-08-27T22:49:12.799562",
+      "response_data": null
+    },
+    {
+      "test_name": "Config file Cisco IOS-XR",
+      "status": "PASSED",
+      "details": "File exists with 72 lines",
+      "timestamp": "2025-08-27T22:49:12.921973",
+      "response_data": null
+    },
+    {
+      "test_name": "Config content Cisco IOS-XR",
+      "status": "PASSED",
+      "details": "Valid content: ! Cisco IOS-XR Configuration for L3VPN ACME-CORP-V...",
+      "timestamp": "2025-08-27T22:49:12.984520",
+      "response_data": null
+    },
+    {
+      "test_name": "API Server Setup",
+      "status": "PASSED",
+      "details": "Test API server started on port 8000",
+      "timestamp": "2025-08-27T22:49:16.104428",
+      "response_data": null
+    },
+    {
+      "test_name": "API Health Check",
+      "status": "FAILED",
+      "details": "curl failed: ",
+      "timestamp": "2025-08-27T22:49:16.227604",
+      "response_data": null
+    },
+    {
+      "test_name": "API Device List",
+      "status": "FAILED",
+      "details": "curl failed: ",
+      "timestamp": "2025-08-27T22:49:16.303415",
+      "response_data": null
+    },
+    {
+      "test_name": "API Service List",
+      "status": "FAILED",
+      "details": "curl failed: ",
+      "timestamp": "2025-08-27T22:49:16.375688",
+      "response_data": null
+    },
+    {
+      "test_name": "API Intent Processing",
+      "status": "FAILED",
+      "details": "curl failed: ",
+      "timestamp": "2025-08-27T22:49:16.432077",
+      "response_data": null
+    },
+    {
+      "test_name": "Intent parsing L3VPN Intent",
+      "status": "PASSED",
+      "details": "Input correctly parsed: 4/4 attributes matched",
+      "timestamp": "2025-08-27T22:49:16.432343",
+      "response_data": {
+        "service_type": "L3VPN",
+        "devices": [
+          "PE1",
+          "PE2"
+        ],
+        "protocols": [
+          "bgp"
+        ],
+        "bgp_asn": "65000"
+      }
+    },
+    {
+      "test_name": "Intent parsing EVPN Intent",
+      "status": "FAILED",
+      "details": "Poor parsing quality: 2/3 attributes matched",
+      "timestamp": "2025-08-27T22:49:16.432387",
+      "response_data": {
+        "service_type": "EVPN",
+        "devices": [],
+        "protocols": [],
+        "vni": "10001"
+      }
+    },
+    {
+      "test_name": "Nokia Config Deployment - Config file exists",
+      "status": "PASSED",
+      "details": "Validation check successful",
+      "timestamp": "2025-08-27T22:49:16.492880",
+      "response_data": null
+    },
+    {
+      "test_name": "Nokia Config Deployment - Config contains L3VPN",
+      "status": "PASSED",
+      "details": "Validation check successful",
+      "timestamp": "2025-08-27T22:49:16.562537",
+      "response_data": null
+    },
+    {
+      "test_name": "Nokia Config Deployment - Config contains BGP",
+      "status": "PASSED",
+      "details": "Validation check successful",
+      "timestamp": "2025-08-27T22:49:16.621161",
+      "response_data": null
+    },
+    {
+      "test_name": "Nokia Config Deployment - Config contains BFD",
+      "status": "PASSED",
+      "details": "Validation check successful",
+      "timestamp": "2025-08-27T22:49:16.676608",
+      "response_data": null
+    },
+    {
+      "test_name": "Nokia Config Deployment Overall",
+      "status": "PASSED",
+      "details": "4/4 checks passed",
+      "timestamp": "2025-08-27T22:49:16.676664",
+      "response_data": null
+    },
+    {
+      "test_name": "Cisco Config Deployment - Config file exists",
+      "status": "PASSED",
+      "details": "Validation check successful",
+      "timestamp": "2025-08-27T22:49:16.731834",
+      "response_data": null
+    },
+    {
+      "test_name": "Cisco Config Deployment - Config contains VRF",
+      "status": "PASSED",
+      "details": "Validation check successful",
+      "timestamp": "2025-08-27T22:49:16.781821",
+      "response_data": null
+    },
+    {
+      "test_name": "Cisco Config Deployment - Config contains route-target",
+      "status": "PASSED",
+      "details": "Validation check successful",
+      "timestamp": "2025-08-27T22:49:16.833496",
+      "response_data": null
+    },
+    {
+      "test_name": "Cisco Config Deployment - Config contains interface",
+      "status": "PASSED",
+      "details": "Validation check successful",
+      "timestamp": "2025-08-27T22:49:16.881569",
+      "response_data": null
+    },
+    {
+      "test_name": "Cisco Config Deployment Overall",
+      "status": "PASSED",
+      "details": "4/4 checks passed",
+      "timestamp": "2025-08-27T22:49:16.881641",
+      "response_data": null
+    }
+  ]
+}

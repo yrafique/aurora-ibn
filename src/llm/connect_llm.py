@@ -116,7 +116,7 @@ class LLMConnector:
     ) -> BaseLLM:
         """
         Dedicated function to connect to MLX provider on Mac
-        Optimized for Apple Silicon with local model execution
+        Optimized for Mac Silicon with local model execution
         """
         
         mlx_config = LLMProviderConfig(

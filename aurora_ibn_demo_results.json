@@ -85,7 +85,7 @@
         "gnmi:/bfd/sessions/session/state/session-state"
       ]
     },
-    "timestamp": "2025-08-27T22:24:59.043402",
+    "timestamp": "2025-08-27T22:50:43.309085",
     "platform": "AURORA-IBN Demo"
   },
   "evpn_scenario": {
@@ -163,9 +163,9 @@
         "gnmi:/bfd/sessions/session/state/session-state"
       ]
     },
-    "timestamp": "2025-08-27T22:24:59.043461",
+    "timestamp": "2025-08-27T22:50:43.309146",
     "platform": "AURORA-IBN Demo"
   },
-  "demo_timestamp": "2025-08-27T22:24:59.043465",
+  "demo_timestamp": "2025-08-27T22:50:43.309153",
   "platform_version": "AURORA-IBN Demo v1.0"
 }

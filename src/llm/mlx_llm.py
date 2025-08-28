@@ -19,7 +19,7 @@ except ImportError:
 
 class MLXProvider(BaseLLM):
     """
-    MLX LLM Provider for Apple Silicon Macs
+    MLX LLM Provider for Mac Silicon systems
     Optimized for local model execution with Metal Performance Shaders
     """
     

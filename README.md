@@ -12,7 +12,7 @@ AURORA-IBN (Aurora Intent-Based Networking) is a comprehensive, multi-vendor net
 
 - **Natural Language Processing**: Convert plain English intents to network configurations
 - **Multi-Vendor Support**: Nokia, Cisco, Juniper, Huawei, Arista
-- **LLM Integration**: Modular support for MLX (Apple Silicon), OpenAI, Anthropic
+- **LLM Integration**: Modular support for MLX (Mac Silicon), OpenAI, Anthropic
 - **Service Types**: L3VPN, EVPN, QoS, Security, Routing
 - **Risk Assessment**: Pre-deployment validation and rollback mechanisms
 - **Containerized Testing**: Complete Docker-based testing environment

@@ -1,0 +1,119 @@
+{
+  "timestamp": "2025-08-27T22:45:50.274603",
+  "intent": "Create L3VPN service 'ACME-CORP-VPN' between PE1 and PE2.\n    Use interfaces ethernet-1/3 on both devices.\n    Configure BGP AS 65000, enable BFD for fast convergence.\n    Set MTU to 9000 bytes for jumbo frame support.\n    Apply Gold QoS policy with guaranteed bandwidth.\n    Use route-target 65000:1001 for VPN isolation.",
+  "parsed_intent": {
+    "service_type": "L3VPN",
+    "service_name": "ACME-CORP-VPN",
+    "devices": [
+      "PE1",
+      "PE2"
+    ],
+    "interfaces": [
+      "ethernet-1/3",
+      "GigabitEthernet0/0/0/3"
+    ],
+    "protocols": [
+      "bgp"
+    ],
+    "policies": {
+      "bfd": true,
+      "mtu": 9000,
+      "qos": "gold",
+      "route_target": "65000:1001"
+    }
+  },
+  "risk_assessment": {
+    "risk_level": "MEDIUM",
+    "impact_analysis": {
+      "service_disruption": "Low - New service creation",
+      "customer_impact": "None - No existing services affected",
+      "rollback_complexity": "Low - Configuration can be cleanly removed"
+    },
+    "validation_checks": [
+      "\u2705 Interface availability verified",
+      "\u2705 BGP ASN consistency confirmed",
+      "\u2705 Route target uniqueness validated",
+      "\u2705 QoS policy template available"
+    ]
+  },
+  "configurations": {
+    "PE1": {
+      "vendor": "nokia",
+      "transport": "netconf",
+      "format": "xml",
+      "config": "<truncated - 1245 chars>",
+      "deployment_method": "NETCONF push"
+    },
+    "PE2": {
+      "vendor": "cisco",
+      "transport": "netconf",
+      "format": "xml",
+      "config": "<truncated - 2211 chars>",
+      "deployment_method": "NETCONF push"
+    }
+  },
+  "deployment_results": {
+    "PE1": {
+      "status": "SUCCESS",
+      "method": "NETCONF push",
+      "timestamp": "2025-08-27T22:45:49.269656",
+      "config_hash": "sha256:862341ff",
+      "rollback_id": "rb_pe1_1756349149"
+    },
+    "PE2": {
+      "status": "SUCCESS",
+      "method": "NETCONF push",
+      "timestamp": "2025-08-27T22:45:50.274355",
+      "config_hash": "sha256:a2325320",
+      "rollback_id": "rb_pe2_1756349150"
+    }
+  },
+  "verification_tests": [
+    {
+      "test": "Service Status Check",
+      "result": "\u2705 PASSED",
+      "details": "L3VPN service 'ACME-CORP-VPN' is operationally up"
+    },
+    {
+      "test": "Interface State Verification",
+      "result": "\u2705 PASSED",
+      "details": "All service interfaces are up and configured"
+    },
+    {
+      "test": "BGP Neighbor Establishment",
+      "result": "\u2705 PASSED",
+      "details": "BGP sessions established between PE devices"
+    },
+    {
+      "test": "Route Advertisement",
+      "result": "\u2705 PASSED",
+      "details": "VPN routes properly advertised with correct RT"
+    },
+    {
+      "test": "BFD Session Status",
+      "result": "\u2705 PASSED",
+      "details": "BFD sessions active with 300ms intervals"
+    },
+    {
+      "test": "QoS Policy Application",
+      "result": "\u2705 PASSED",
+      "details": "Gold QoS policies applied and active"
+    },
+    {
+      "test": "End-to-End Connectivity",
+      "result": "\u2705 PASSED",
+      "details": "Customer traffic flowing between sites"
+    }
+  ],
+  "summary": {
+    "service_name": "ACME-CORP-VPN",
+    "service_type": "L3VPN",
+    "deployment_status": "SUCCESS",
+    "deployment_time": "45 seconds",
+    "devices_configured": 2,
+    "total_config_lines": 115,
+    "risk_level": "MEDIUM",
+    "rollback_available": true,
+    "monitoring_enabled": true
+  }
+}

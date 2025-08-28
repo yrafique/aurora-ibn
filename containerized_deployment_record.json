@@ -1,0 +1,79 @@
+{
+  "summary": {
+    "service_name": "ACME-CORP-VPN",
+    "service_type": "L3VPN",
+    "deployment_status": "SUCCESS",
+    "start_time": "2025-08-27T22:47:02",
+    "devices_configured": 2,
+    "total_devices": 2,
+    "success_rate": "2/2",
+    "configuration_files": 2,
+    "total_config_lines": 148,
+    "deployment_method": "Containerized Mock Devices",
+    "validation_tests": 7,
+    "validation_passed": 7
+  },
+  "deployment_results": {
+    "PE1": {
+      "status": "SUCCESS",
+      "device": "Nokia SR Linux",
+      "method": "CLI/NETCONF Simulation",
+      "timestamp": "2025-08-27T22:47:02.465089",
+      "output": "Configuration applied successfully\nCommit complete"
+    },
+    "PE2": {
+      "status": "SUCCESS",
+      "device": "Cisco IOS-XR",
+      "method": "CLI/NETCONF Simulation",
+      "timestamp": "2025-08-27T22:47:02.587388",
+      "output": "Configuration applied successfully\nRP/0/RP0/CPU0: %SYS-5-CONFIG_I : Configured from console"
+    }
+  },
+  "validation_tests": [
+    {
+      "test": "Configuration Syntax",
+      "status": "\u2705 PASSED",
+      "details": "All configurations syntactically valid"
+    },
+    {
+      "test": "Device Reachability",
+      "status": "\u2705 PASSED",
+      "details": "Both PE devices reachable via management"
+    },
+    {
+      "test": "Interface Configuration",
+      "status": "\u2705 PASSED",
+      "details": "Customer interfaces configured successfully"
+    },
+    {
+      "test": "VRF/Network-Instance",
+      "status": "\u2705 PASSED",
+      "details": "L3VPN service instances created"
+    },
+    {
+      "test": "Route Target Assignment",
+      "status": "\u2705 PASSED",
+      "details": "RT 65000:1001 configured on both devices"
+    },
+    {
+      "test": "BFD Configuration",
+      "status": "\u2705 PASSED",
+      "details": "BFD enabled with 300ms intervals"
+    },
+    {
+      "test": "QoS Policy Application",
+      "status": "\u2705 PASSED",
+      "details": "Gold QoS policies applied to interfaces"
+    }
+  ],
+  "configurations": {
+    "nokia": {
+      "lines": 77,
+      "size": 1735
+    },
+    "cisco": {
+      "lines": 71,
+      "size": 1237
+    }
+  }
+}
