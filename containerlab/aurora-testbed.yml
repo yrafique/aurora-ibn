@@ -1,0 +1,211 @@
+name: aurora-ibn-testbed
+
+mgmt:
+  network: aurora-mgmt
+  ipv4-subnet: 172.20.20.0/24
+
+topology:
+  kinds:
+    nokia_srlinux:
+      image: ghcr.io/nokia/srlinux:latest
+      type: ixrd2
+    ceos:
+      image: ceos:4.30.0F
+      type: cEOS
+    linux:
+      image: alpine:latest
+
+  nodes:
+    # Nokia SR Linux PE devices
+    pe1-srlinux:
+      kind: nokia_srlinux
+      type: ixrd2
+      mgmt-ipv4: 172.20.20.10
+      startup-config: configs/pe1-srlinux.cfg
+      ports:
+        - 830:830    # NETCONF
+        - 443:443    # RESTCONF
+        - 9339:9339  # gNMI
+        - 9000:9000  # gNOI
+      labels:
+        vendor: nokia
+        role: pe
+        site: west
+
+    pe2-srlinux:
+      kind: nokia_srlinux
+      type: ixrd2
+      mgmt-ipv4: 172.20.20.11
+      startup-config: configs/pe2-srlinux.cfg
+      ports:
+        - 831:830    # NETCONF
+        - 444:443    # RESTCONF
+        - 9340:9339  # gNMI
+        - 9001:9000  # gNOI
+      labels:
+        vendor: nokia
+        role: pe
+        site: east
+
+    # Arista cEOS PE devices
+    pe3-ceos:
+      kind: ceos
+      mgmt-ipv4: 172.20.20.12
+      startup-config: configs/pe3-ceos.cfg
+      ports:
+        - 832:830    # NETCONF
+        - 445:443    # RESTCONF
+        - 9341:9339  # gNMI
+      labels:
+        vendor: arista
+        role: pe
+        site: south
+
+    # Core P device (SR Linux)
+    p1-srlinux:
+      kind: nokia_srlinux
+      type: ixrd3
+      mgmt-ipv4: 172.20.20.20
+      startup-config: configs/p1-srlinux.cfg
+      ports:
+        - 833:830    # NETCONF
+        - 446:443    # RESTCONF
+        - 9342:9339  # gNMI
+      labels:
+        vendor: nokia
+        role: p
+        site: core
+
+    # Route Reflector (cEOS)
+    rr1-ceos:
+      kind: ceos
+      mgmt-ipv4: 172.20.20.21
+      startup-config: configs/rr1-ceos.cfg
+      ports:
+        - 834:830    # NETCONF
+        - 447:443    # RESTCONF
+        - 9343:9339  # gNMI
+      labels:
+        vendor: arista
+        role: rr
+        site: core
+
+    # Customer Edge devices (Linux)
+    ce1-linux:
+      kind: linux
+      mgmt-ipv4: 172.20.20.30
+      exec:
+        - ip addr add 192.168.100.1/24 dev eth1
+        - ip route add 192.168.0.0/16 via 192.168.100.254
+      labels:
+        role: ce
+        site: west
+        customer: acme
+
+    ce2-linux:
+      kind: linux
+      mgmt-ipv4: 172.20.20.31
+      exec:
+        - ip addr add 192.168.200.1/24 dev eth1
+        - ip route add 192.168.0.0/16 via 192.168.200.254
+      labels:
+        role: ce
+        site: east
+        customer: acme
+
+    # AURORA-IBN Controller
+    aurora-controller:
+      kind: linux
+      image: python:3.11-alpine
+      mgmt-ipv4: 172.20.20.100
+      binds:
+        - ../src:/app/aurora-ibn:ro
+        - ../examples:/app/examples:ro
+      exec:
+        - apk add --no-cache git curl
+        - pip install asyncio aiohttp pyyaml
+      ports:
+        - 8000:8000   # API Server
+        - 8080:8080   # Web UI
+      labels:
+        role: controller
+        app: aurora-ibn
+
+  links:
+    # PE-P links
+    - endpoints: ["pe1-srlinux:e1-1", "p1-srlinux:e1-1"]
+      mtu: 9000
+    - endpoints: ["pe2-srlinux:e1-1", "p1-srlinux:e1-2"]
+      mtu: 9000
+    - endpoints: ["pe3-ceos:et1", "p1-srlinux:e1-3"]
+      mtu: 9000
+
+    # P-RR links
+    - endpoints: ["p1-srlinux:e1-4", "rr1-ceos:et2"]
+      mtu: 9000
+
+    # PE-RR direct links for BGP
+    - endpoints: ["pe1-srlinux:e1-2", "rr1-ceos:et3"]
+      mtu: 9000
+    - endpoints: ["pe2-srlinux:e1-2", "rr1-ceos:et4"]
+      mtu: 9000
+
+    # CE-PE links (customer connections)
+    - endpoints: ["ce1-linux:eth1", "pe1-srlinux:e1-3"]
+      mtu: 1500
+    - endpoints: ["ce2-linux:eth1", "pe2-srlinux:e1-3"]
+      mtu: 1500
+
+    # Controller management connections (implicit via mgmt network)
+
+# Additional metadata for AURORA-IBN
+aurora-metadata:
+  testbed-version: "1.0"
+  description: "Multi-vendor AURORA-IBN testbed for L3VPN and EVPN validation"
+  
+  services:
+    l3vpn-acme:
+      type: l3vpn
+      endpoints: ["pe1-srlinux", "pe2-srlinux"]
+      vrf: "ACME"
+      rd: "65000:100"
+      rt: ["65000:100"]
+      
+    evpn-datacenter:
+      type: evpn
+      endpoints: ["pe1-srlinux", "pe3-ceos"]
+      evi: 200
+      vlan: 200
+      
+  intent-scenarios:
+    - name: "l3vpn-basic"
+      description: "Basic L3VPN between PE1 and PE2"
+      intent: "Create L3VPN ACME between PE1 and PE2 with BFD"
+      
+    - name: "evpn-elan"
+      description: "EVPN E-LAN service"
+      intent: "Provision EVPN E-LAN between all PE devices with VLAN 100"
+      
+    - name: "multi-service"
+      description: "Multiple services on same infrastructure"
+      intent: "Deploy L3VPN customer1 and EVPN datacenter services"
+      
+  validation-tests:
+    connectivity:
+      - "ping from ce1-linux to ce2-linux via L3VPN"
+      - "traceroute validation across MPLS core"
+      
+    bgp:
+      - "BGP VPNv4 route exchange verification"
+      - "Route reflector functionality"
+      
+    evpn:
+      - "MAC learning and advertisement"
+      - "BUM traffic handling"
+      
+  monitoring:
+    telemetry-targets:
+      - "interfaces operational status"
+      - "bgp neighbor states"
+      - "mpls forwarding table"
+      - "service statistics"

@@ -1,0 +1,289 @@
+version: '3.8'
+
+services:
+  # AURORA-IBN Controller - Main platform
+  aurora-controller:
+    image: python:3.11-slim
+    container_name: aurora-controller
+    hostname: aurora-controller
+    networks:
+      aurora-mgmt:
+        ipv4_address: 172.25.25.100
+    ports:
+      - "8000:8000"   # API Server
+      - "8080:8080"   # Web UI
+      - "8888:8888"   # Jupyter
+      - "2200:22"     # SSH
+    volumes:
+      - ../src:/app/aurora-ibn/src:ro
+      - ../examples:/app/aurora-ibn/examples:ro
+      - ./test-results:/app/results
+      - ./configs:/app/configs
+    working_dir: /app/aurora-ibn
+    environment:
+      - PYTHONPATH=/app/aurora-ibn/src
+      - AURORA_LLM_PROVIDER=mlx
+      - AURORA_LLM_MODEL=mlx-community/Llama-3.2-3B-Instruct-4bit
+      - DEBIAN_FRONTEND=noninteractive
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y git curl build-essential openssh-server vim iputils-ping net-tools &&
+      pip install --no-cache-dir aiohttp pyyaml asyncssh netaddr pandas jupyter &&
+      
+      # Setup SSH
+      mkdir -p /var/run/sshd &&
+      echo 'root:aurora123' | chpasswd &&
+      echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config &&
+      echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config &&
+      
+      # Create aurora user
+      useradd -m -s /bin/bash aurora &&
+      echo 'aurora:aurora123' | chpasswd &&
+      usermod -aG sudo aurora &&
+      
+      # Start SSH daemon
+      /usr/sbin/sshd -D &
+      
+      echo '🚀 AURORA-IBN Controller Ready' &&
+      echo 'SSH: ssh aurora@localhost -p 2200 (password: aurora123)' &&
+      echo 'Root SSH: ssh root@localhost -p 2200 (password: aurora123)' &&
+      
+      tail -f /dev/null
+      "
+    restart: unless-stopped
+
+  # Test automation container
+  aurora-tester:
+    image: python:3.11-slim
+    container_name: aurora-tester
+    hostname: aurora-tester
+    networks:
+      aurora-mgmt:
+        ipv4_address: 172.25.25.101
+    ports:
+      - "2201:22"     # SSH
+    volumes:
+      - ../:/app/aurora-ibn
+      - ./test-results:/app/results
+    working_dir: /app/aurora-ibn/containerlab
+    environment:
+      - PYTHONPATH=/app/aurora-ibn/src
+      - DEBIAN_FRONTEND=noninteractive
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y git curl iputils-ping openssh-server vim net-tools &&
+      pip install --no-cache-dir aiohttp pyyaml asyncssh netaddr &&
+      
+      # Setup SSH
+      mkdir -p /var/run/sshd &&
+      echo 'root:tester123' | chpasswd &&
+      echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config &&
+      echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config &&
+      
+      # Create tester user
+      useradd -m -s /bin/bash tester &&
+      echo 'tester:tester123' | chpasswd &&
+      usermod -aG sudo tester &&
+      
+      # Start SSH daemon
+      /usr/sbin/sshd -D &
+      
+      echo '🧪 AURORA-IBN Tester Ready' &&
+      echo 'SSH: ssh tester@localhost -p 2201 (password: tester123)' &&
+      
+      tail -f /dev/null
+      "
+    restart: unless-stopped
+
+  # Customer Edge 1 - Simulated customer device
+  ce1-linux:
+    image: alpine:latest
+    container_name: ce1-linux
+    hostname: ce1-linux
+    networks:
+      aurora-mgmt:
+        ipv4_address: 172.25.25.30
+      customer-west:
+        ipv4_address: 192.168.100.1
+    ports:
+      - "2230:22"     # SSH
+    command: >
+      sh -c "
+      apk add --no-cache iproute2 iputils tcpdump openssh bash vim curl &&
+      
+      # Setup SSH
+      ssh-keygen -A &&
+      echo 'root:ce1pass' | chpasswd &&
+      echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config &&
+      echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config &&
+      
+      # Add customer routes
+      ip route add 192.168.200.0/24 via 192.168.100.254 2>/dev/null || true &&
+      
+      # Start SSH daemon
+      /usr/sbin/sshd -D &
+      
+      echo '💻 CE1 Linux Ready (Customer West)' &&
+      echo 'SSH: ssh root@localhost -p 2230 (password: ce1pass)' &&
+      echo 'Customer IP: 192.168.100.1' &&
+      
+      tail -f /dev/null
+      "
+    restart: unless-stopped
+
+  # Customer Edge 2 - Simulated customer device
+  ce2-linux:
+    image: alpine:latest
+    container_name: ce2-linux
+    hostname: ce2-linux
+    networks:
+      aurora-mgmt:
+        ipv4_address: 172.25.25.31
+      customer-east:
+        ipv4_address: 192.168.200.1
+    ports:
+      - "2231:22"     # SSH
+    command: >
+      sh -c "
+      apk add --no-cache iproute2 iputils tcpdump openssh bash vim curl &&
+      
+      # Setup SSH
+      ssh-keygen -A &&
+      echo 'root:ce2pass' | chpasswd &&
+      echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config &&
+      echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config &&
+      
+      # Add customer routes
+      ip route add 192.168.100.0/24 via 192.168.200.254 2>/dev/null || true &&
+      
+      # Start SSH daemon
+      /usr/sbin/sshd -D &
+      
+      echo '💻 CE2 Linux Ready (Customer East)' &&
+      echo 'SSH: ssh root@localhost -p 2231 (password: ce2pass)' &&
+      echo 'Customer IP: 192.168.200.1' &&
+      
+      tail -f /dev/null
+      "
+    restart: unless-stopped
+
+  # Network monitoring and tools container
+  nettools:
+    image: nicolaka/netshoot
+    container_name: nettools
+    hostname: nettools
+    networks:
+      aurora-mgmt:
+        ipv4_address: 172.25.25.200
+    ports:
+      - "2240:22"     # SSH
+    command: >
+      bash -c "
+      # Setup SSH server
+      apt-get update &&
+      apt-get install -y openssh-server &&
+      mkdir -p /var/run/sshd &&
+      echo 'root:nettools123' | chpasswd &&
+      echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config &&
+      echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config &&
+      
+      # Start SSH daemon
+      /usr/sbin/sshd -D &
+      
+      echo '🔧 Network Tools Container Ready' &&
+      echo 'SSH: ssh root@localhost -p 2240 (password: nettools123)' &&
+      echo 'Tools: nmap, tcpdump, curl, dig, etc.' &&
+      
+      tail -f /dev/null
+      "
+    restart: unless-stopped
+    privileged: true  # For advanced network tools
+
+  # Mock Nokia SR Linux device (simplified)
+  mock-srlinux-pe1:
+    image: python:3.11-alpine
+    container_name: mock-srlinux-pe1
+    hostname: pe1-srlinux
+    networks:
+      aurora-mgmt:
+        ipv4_address: 172.25.25.10
+    ports:
+      - "8301:830"    # NETCONF
+      - "9101:9339"   # gNMI
+      - "2210:22"     # SSH
+    command: >
+      sh -c "
+      apk add --no-cache openssh bash vim &&
+      pip install --no-cache-dir lxml &&
+      ssh-keygen -A &&
+      echo 'root:admin' | chpasswd &&
+      adduser -D -s /bin/bash admin &&
+      echo 'admin:admin' | chpasswd &&
+      echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config &&
+      echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config &&
+      /usr/sbin/sshd -D &
+      echo 'Mock Nokia SR Linux PE1 Ready' &&
+      echo 'SSH: ssh admin@localhost -p 2210 (password: admin)' &&
+      tail -f /dev/null
+      "
+    restart: unless-stopped
+
+  # Mock Cisco device (simplified)  
+  mock-cisco-pe2:
+    image: python:3.11-alpine
+    container_name: mock-cisco-pe2
+    hostname: pe2-cisco
+    networks:
+      aurora-mgmt:
+        ipv4_address: 172.25.25.11
+    ports:
+      - "8302:830"    # NETCONF
+      - "9102:9339"   # gNMI
+      - "2211:22"     # SSH
+    command: >
+      sh -c "
+      apk add --no-cache openssh bash vim &&
+      pip install --no-cache-dir lxml &&
+      ssh-keygen -A &&
+      echo 'root:admin' | chpasswd &&
+      adduser -D -s /bin/bash cisco &&
+      echo 'cisco:cisco' | chpasswd &&
+      echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config &&
+      echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config &&
+      /usr/sbin/sshd -D &
+      echo 'Mock Cisco IOS-XR PE2 Ready' &&
+      echo 'SSH: ssh cisco@localhost -p 2211 (password: cisco)' &&
+      tail -f /dev/null
+      "
+    restart: unless-stopped
+
+networks:
+  aurora-mgmt:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.25.0/24
+          gateway: 172.25.25.1
+
+  customer-west:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.100.0/24
+          gateway: 192.168.100.254
+
+  customer-east:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.200.0/24
+          gateway: 192.168.200.254
+
+volumes:
+  aurora-data:
+    driver: local

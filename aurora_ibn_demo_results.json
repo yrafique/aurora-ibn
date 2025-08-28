@@ -1,0 +1,171 @@
+{
+  "l3vpn_scenario": {
+    "intent_summary": "\n    Create an L3VPN service called DEMO-CORP between PE1 and PE2.\n    Use interfaces GigabitEtherne...",
+    "risk_assessment": {
+      "level": "HIGH",
+      "factors": [
+        "L3VPN service requires BGP and MPLS configuration",
+        "Multi-vendor deployment: nokia, cisco"
+      ],
+      "mitigations": [
+        "Use confirmed-commit for safe deployment",
+        "Validate cross-vendor interoperability"
+      ]
+    },
+    "model_discovery": [
+      {
+        "target": "PE1",
+        "transport": "NETCONF",
+        "models_found": [
+          "nokia-conf@2021-09-30",
+          "nokia-state-service@2021-09-30",
+          "nokia-state-system@2021-09-30"
+        ],
+        "source": "simulated",
+        "gaps": []
+      },
+      {
+        "target": "PE2",
+        "transport": "NETCONF",
+        "models_found": [
+          "Cisco-IOS-XR-infra-rsi-cfg@2019-04-05",
+          "Cisco-IOS-XR-mpls-vpn-cfg@2019-04-05",
+          "Cisco-IOS-XR-bgp-cfg@2019-04-05"
+        ],
+        "source": "simulated",
+        "gaps": []
+      }
+    ],
+    "normalized_intent": {
+      "service_type": "l3vpn",
+      "endpoints": [
+        {
+          "device": "PE1",
+          "interface": "auto"
+        },
+        {
+          "device": "PE2",
+          "interface": "auto"
+        }
+      ],
+      "requirements": {
+        "bfd": true,
+        "latency_ms": 20
+      }
+    },
+    "candidate_payloads": [
+      {
+        "target": "PE1",
+        "transport": "NETCONF",
+        "payload_type": "xml",
+        "payload": "<config xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n  <configure xmlns=\"urn:nokia.com:sros:ns:yang:sr:conf\">\n    <service>\n      <vprn>\n        <service-id>100</service-id>\n        <admin-state>enable</admin-state>\n        <service-name>CUSTOMER_VPN</service-name>\n        <customer>1</customer>\n        <description>L3VPN service for CUSTOMER_VPN</description>\n        <route-distinguisher>65000:100</route-distinguisher>\n        <vrf-target>\n          <community>target:65000:100</community>\n          <import-export/>\n        </vrf-target>\n        <bgp-ipvpn>\n          <mpls>\n            <admin-state>enable</admin-state>\n            <route-distinguisher>65000:100</route-distinguisher>\n            <vrf-target>\n              <export>target:65000:100</export>\n              <import>target:65000:100</import>\n            </vrf-target>\n          </mpls>\n        </bgp-ipvpn>\n      </vprn>\n    </service>\n  </configure>\n</config>",
+        "size_chars": 935
+      },
+      {
+        "target": "PE2",
+        "transport": "NETCONF",
+        "payload_type": "xml",
+        "payload": "<config xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n  <vrfs xmlns=\"http://cisco.com/ns/yang/Cisco-IOS-XR-infra-rsi-cfg\">\n    <vrf>\n      <vrf-name>CUSTOMER_VPN</vrf-name>\n      <create/>\n      <description>L3VPN service for CUSTOMER_VPN</description>\n      <vpn-id>\n        <vpn-oui>1</vpn-oui>\n        <vpn-index>1</vpn-index>\n      </vpn-id>\n    </vrf>\n  </vrfs>\n  <bgp xmlns=\"http://cisco.com/ns/yang/Cisco-IOS-XR-bgp-cfg\">\n    <instance>\n      <instance-name>default</instance-name>\n      <instance-as>\n        <as>0</as>\n        <four-byte-as>\n          <as>65000</as>\n          <vrfs>\n            <vrf>\n              <vrf-name>CUSTOMER_VPN</vrf-name>\n              <vrf-global>\n                <route-distinguisher>\n                  <type>as</type>\n                  <as>65000</as>\n                  <as-index>2</as-index>\n                </route-distinguisher>\n              </vrf-global>\n            </vrf>\n          </vrfs>\n        </four-byte-as>\n      </instance-as>\n    </instance>\n  </bgp>\n</config>",
+        "size_chars": 1018
+      }
+    ],
+    "verification_plan": {
+      "tests": [
+        "VRF creation verification",
+        "BGP VPNv4 neighbor establishment",
+        "Route distinguisher configuration check",
+        "VRF routing table population",
+        "Connectivity test from PE1 to PE2",
+        "BFD session establishment verification"
+      ],
+      "telemetry_queries": [
+        "gnmi:/network-instances/network-instance/state/name",
+        "gnmi:/bgp/neighbors/neighbor/state/session-state",
+        "netconf filter: <routing-instances><instance><name/></instance></routing-instances>",
+        "gnmi:/bfd/sessions/session/state/session-state"
+      ]
+    },
+    "timestamp": "2025-08-27T22:24:59.043402",
+    "platform": "AURORA-IBN Demo"
+  },
+  "evpn_scenario": {
+    "intent_summary": "\n    Provision EVPN VPWS E-Line service between datacenter sites.\n    Connect PE-DC1 xe-0/0/5 to PE-...",
+    "risk_assessment": {
+      "level": "HIGH",
+      "factors": [
+        "EVPN requires complex BGP EVPN configuration",
+        "Multi-vendor deployment: nokia, juniper",
+        "Aggressive latency requirements"
+      ],
+      "mitigations": [
+        "Validate MAC learning post-deployment",
+        "Validate cross-vendor interoperability",
+        "Enable performance monitoring"
+      ]
+    },
+    "model_discovery": [
+      {
+        "target": "PE-DC1",
+        "transport": "NETCONF",
+        "models_found": [
+          "junos-conf-routing-instances@2021-01-01",
+          "junos-conf-protocols@2021-01-01"
+        ],
+        "source": "simulated",
+        "gaps": []
+      },
+      {
+        "target": "PE-DC2",
+        "transport": "NETCONF",
+        "models_found": [
+          "nokia-conf@2021-09-30",
+          "nokia-state-service@2021-09-30",
+          "nokia-state-system@2021-09-30"
+        ],
+        "source": "simulated",
+        "gaps": []
+      }
+    ],
+    "normalized_intent": {
+      "service_type": "evpn",
+      "endpoints": [],
+      "requirements": {
+        "bfd": true
+      }
+    },
+    "candidate_payloads": [
+      {
+        "target": "PE-DC1",
+        "transport": "NETCONF",
+        "payload_type": "xml",
+        "payload": "# Configuration for PE-DC1 - juniper\n# Service: evpn\n",
+        "size_chars": 53
+      },
+      {
+        "target": "PE-DC2",
+        "transport": "NETCONF",
+        "payload_type": "xml",
+        "payload": "# Configuration for PE-DC2 - nokia\n# Service: evpn\n",
+        "size_chars": 51
+      }
+    ],
+    "verification_plan": {
+      "tests": [
+        "EVPN instance creation verification",
+        "BGP EVPN neighbor establishment",
+        "MAC learning verification",
+        "EVPN route advertisement check",
+        "BFD session establishment verification"
+      ],
+      "telemetry_queries": [
+        "gnmi:/bgp/neighbors/neighbor/afi-safis/afi-safi[afi-safi-name=l2vpn-evpn]",
+        "gnmi:/network-instances/network-instance/protocols/protocol[name=bgp]/bgp",
+        "gnmi:/bfd/sessions/session/state/session-state"
+      ]
+    },
+    "timestamp": "2025-08-27T22:24:59.043461",
+    "platform": "AURORA-IBN Demo"
+  },
+  "demo_timestamp": "2025-08-27T22:24:59.043465",
+  "platform_version": "AURORA-IBN Demo v1.0"
+}
